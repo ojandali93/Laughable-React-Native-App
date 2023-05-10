@@ -7,4 +7,4 @@ const options = {
   }
 };
 
-module.exports = {potions}
+module.exports = {options}
