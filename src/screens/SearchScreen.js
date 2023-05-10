@@ -1,14 +1,20 @@
-import React, { useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {View, Text, TouchableOpacity, TextInput, FlatList, StyleSheet} from 'react-native'
 
 import axios from 'axios'
 
 import { searchOption } from '../../rapidApi'
+import { GeneralContext } from '../GeneralContext'
+import { auth } from '../../firebase'
 
 const SearchScreen = () => {
 
   const [search, setSearch] = useState('')
   const [jokes, setJokes] = useState('')
+
+  const {addToFavorites} = useContext(GeneralContext)
+  const {currentFavoritesIds} = useContext(GeneralContext)
+  const {removeFromFavorites} = useContext(GeneralContext)
 
   const submitSearch = () => {
     searchOption.params.term = search
@@ -48,8 +54,19 @@ const SearchScreen = () => {
                 <View>
                   <Text style={styles.text}><Text style={styles.label}>Answer:</Text> {item.item.punchline}</Text>
                 </View>
-                <View>
-                  <Text>Likes: {item.item.likesCount}</Text>
+                <View style={styles.engagement}>
+                  <Text>
+                    Likes: {item.item.likesCount} 
+                  </Text>
+                  {
+                    currentFavoritesIds.includes(item.item._id)
+                        ?<TouchableOpacity onPress={() => {removeFromFavorites(item)}}>
+                          <Text>Remove From Favorites</Text>
+                        </TouchableOpacity>
+                      : <TouchableOpacity  onPress={() => {addToFavorites(item)}}>
+                          <Text>Add To Favorites</Text>
+                        </TouchableOpacity>
+                  }
                 </View>
               </View>
             )
@@ -97,6 +114,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     width: '50%',
     marginLeft: 8
+  },
+  engagement: {
+    height: 25,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   }
 })
 

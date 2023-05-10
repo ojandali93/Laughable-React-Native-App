@@ -1,4 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Feather } from 'react-native-vector-icons'
+
 
 import HomeScreen from './src/screens/HomeScreen';
 import SearchScreen from './src/screens/SearchScreen';
@@ -13,15 +15,24 @@ function BottomTabNavigation() {
       <Tab.Screen 
         name="Enjoy A Laugh" 
         key='Home'
-        component={HomeScreen} />
+        component={HomeScreen} 
+        options={{
+          tabBarIcon: ({size, color}) => (<Feather name={"smile"} color={color} size={size} />)
+        }}/>
       <Tab.Screen 
         name="Search" 
         key='Search'
-        component={SearchScreen} />
+        component={SearchScreen} 
+        options={{
+          tabBarIcon: ({size, color}) => (<Feather name={"search"} color={color} size={size} />)
+        }}/>
       <Tab.Screen 
         name="Profile"
         key='Profile'
-        component={ProfileStackNavigation} />
+        component={ProfileStackNavigation} 
+        options={{
+          tabBarIcon: ({size, color}) => (<Feather name={"user"} color={color} size={size} />)
+        }}/>
     </Tab.Navigator>
   );
 }

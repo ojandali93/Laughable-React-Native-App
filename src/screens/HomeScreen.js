@@ -1,17 +1,22 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import {View, Text, TouchableOpacity, FlatList, StyleSheet} from 'react-native'
 
 import axios from 'axios'
 import { options } from '../../rapidApi'
+import { GeneralContext } from '../GeneralContext'
+import { auth } from '../../firebase'
 
 const HomeScreen = () => {
 
   const [jokes, setJokes] = useState([])
 
+  const {addToFavorites, grabFavorites} = useContext(GeneralContext)
+  const {currentFavoritesIds} = useContext(GeneralContext)
+  const {removeFromFavorites} = useContext(GeneralContext)
+
   useEffect(() => {
     axios.request(options)
       .then((response) => {
-        console.log(response.data.body.slice(0, 50).length)
         let selectedJokes = response.data.body.splice(0, 50)
         let displayJokes = []
         selectedJokes.forEach((currentJoke) => {
@@ -19,6 +24,9 @@ const HomeScreen = () => {
           displayJokes.push(currentJoke)
         })
         setJokes(displayJokes)
+        auth.currentUser === null
+          ? null 
+          : grabFavorites()
       })
       .catch((error) => {
         console.error(error)
@@ -43,6 +51,15 @@ const HomeScreen = () => {
                 <Text>
                   Likes: {item.item.likesCount} 
                 </Text>
+                {
+                  currentFavoritesIds.includes(item.item._id)
+                      ?<TouchableOpacity onPress={() => {removeFromFavorites(item)}}>
+                        <Text>Remove From Favorites</Text>
+                      </TouchableOpacity>
+                    : <TouchableOpacity  onPress={() => {addToFavorites(item)}}>
+                        <Text>Add To Favorites</Text>
+                      </TouchableOpacity>
+                }
               </View>
             </View>
           )
@@ -74,7 +91,8 @@ const styles = StyleSheet.create({
     height: 25,
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    justifyContent: 'space-between'
   }
 })
 

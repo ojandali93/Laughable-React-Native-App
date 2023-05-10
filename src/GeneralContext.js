@@ -3,7 +3,8 @@ import { createUserWithEmailAndPassword, signOut,
           signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigation } from '@react-navigation/native';
 
-import { auth } from '../firebase';
+import { collection, addDoc, serverTimestamp, query, where, onSnapshot, doc, deleteDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 export const GeneralContext = createContext(null)
 
@@ -17,6 +18,9 @@ export const GeneralContextProvider = ({children}) => {
   const [signupPassword, setSignupPassword] = useState('')
   const [signupVerify, setSignupVerify] = useState('')
 
+  const [currentFavorites, setCurrentFavorites] = useState([])
+  const [currentFavoritesIds, setCurrentFavoritesIds] = useState([])
+
   const createUserAccount = () => {
     signupPassword === signupVerify 
       ? createUser() 
@@ -24,7 +28,6 @@ export const GeneralContextProvider = ({children}) => {
   }
 
   const createUser = () => {
-    console.log('creating user')
     createUserWithEmailAndPassword(auth, signupUsername, signupPassword)
     .then((userCredential) => {
       setSignupPassword('')
@@ -62,12 +65,87 @@ export const GeneralContextProvider = ({children}) => {
     navigation.navigate('ProfileScreen')
   }
 
+  const addToFavorites = (item) => {
+    auth.currentUser === null 
+      ? null 
+      : favoriteJoke(item)
+  }
+
+  const favoriteJoke = (item) => {
+    const collectionRef = collection(db, 'Favorites')
+    let newItem = {}
+    newItem._id = item.item._id
+    newItem.likesCount = item.item.likesCount
+    newItem.setup = item.item.setup
+    newItem.punchline = item.item.punchline
+    newItem.type = item.item.type
+    newItem.shareableLink = item.item.shareableLink
+    addDoc(collectionRef, {
+      'joke': newItem,
+      'userId': auth.currentUser.uid,
+      'jokeId': item.item._id,
+      'createdAt': serverTimestamp()
+    })
+    .then((response) => {
+      console.log('successfully added')
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+  }
+
+  const grabFavorites = () => {
+    auth.currentUser === null 
+      ? null 
+      : collectFavorites()
+  }
+
+  const collectFavorites = () => {
+    const collectionRef = collection(db, 'Favorites')
+    const q = query(collectionRef, where('userId', '==', auth.currentUser.uid))
+    onSnapshot(q, (snapshot) => {
+      let favoritesList = []
+      snapshot.docs.forEach((doc) => {
+        favoritesList.push({ ...doc.data(), id: doc.id })
+      })
+      setCurrentFavorites(favoritesList)
+      grabZpidList(favoritesList)
+    })
+  }
+
+  const grabZpidList = (favoritesList) => {
+    let zpidList = []
+    favoritesList.forEach((fav) => {
+      zpidList.push(fav.jokeId)
+    })
+    setCurrentFavoritesIds(zpidList)
+  }
+
+  const removeFromFavorites = (item) => {
+    let selectedFavorite
+    currentFavorites.forEach((fav) => {
+      fav.jokeId === item.item._id
+        ? selectedFavorite = fav 
+        : null 
+    })
+    const docRef = doc(db, 'Favorites', selectedFavorite.id)
+    deleteDoc(docRef)
+      .then((response) => {
+        console.log('deleted favorite')
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
   return(
     <GeneralContext.Provider value={{loginUsername,
                                     loginPassword,
                                     signupUsername,
                                     signupPassword,
                                     signupVerify,
+                                    currentFavorites,
+                                    currentFavoritesIds,
                                     setLoginUsername,
                                     setLoginPassword,
                                     setSignupUsername,
@@ -75,7 +153,10 @@ export const GeneralContextProvider = ({children}) => {
                                     setSignupVerify,
                                     createUserAccount,
                                     loginUser,
-                                    logoutUser}}>
+                                    logoutUser,
+                                    addToFavorites,
+                                    grabFavorites,
+                                    removeFromFavorites}}>
       {children}
     </GeneralContext.Provider>
   )
