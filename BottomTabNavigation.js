@@ -10,7 +10,7 @@ function BottomTabNavigation() {
   return (
     <Tab.Navigator>
       <Tab.Screen 
-        name="Home" 
+        name="Enjoy A Laugh" 
         key='Home'
         component={HomeScreen} />
       <Tab.Screen 

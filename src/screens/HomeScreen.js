@@ -13,13 +13,17 @@ const HomeScreen = () => {
       .then((response) => {
         console.log(response.data.body.slice(0, 50).length)
         let selectedJokes = response.data.body.splice(0, 50)
-        setJokes(selectedJokes)
+        let displayJokes = []
+        selectedJokes.forEach((currentJoke) => {
+          currentJoke.likesCount = Math.round(Math.random(400) * 100)
+          displayJokes.push(currentJoke)
+        })
+        setJokes(displayJokes)
       })
       .catch((error) => {
         console.error(error)
       })
   }, [])
-
 
   return (
     <View style={styles.window}>
@@ -34,6 +38,11 @@ const HomeScreen = () => {
               </View>
               <View>
                 <Text style={styles.text}><Text style={styles.label}>Answer:</Text> {item.item.punchline}</Text>
+              </View>
+              <View style={styles.engagement}>
+                <Text>
+                  Likes: {item.item.likesCount} 
+                </Text>
               </View>
             </View>
           )
@@ -57,6 +66,15 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 18
+  },
+  like: {
+    marginLeft: 8,
+  },
+  engagement: {
+    height: 25,
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center'
   }
 })
 
