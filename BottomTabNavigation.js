@@ -2,7 +2,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import HomeScreen from './src/screens/HomeScreen';
 import SearchScreen from './src/screens/SearchScreen';
-import MostPopularScreen from './src/screens/MostPopularScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import ProfileStackNavigation from './ProfileStackNavigation';
 
 const Tab = createBottomTabNavigator();
 
@@ -18,9 +19,9 @@ function BottomTabNavigation() {
         key='Search'
         component={SearchScreen} />
       <Tab.Screen 
-        name="Popular"
-        key='Popular'
-        component={MostPopularScreen} />
+        name="Profile"
+        key='Profile'
+        component={ProfileStackNavigation} />
     </Tab.Navigator>
   );
 }
